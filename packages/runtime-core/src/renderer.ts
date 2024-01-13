@@ -1622,7 +1622,7 @@ function baseCreateRenderer(
     flushPreFlushCbs(instance)
     resetTracking()
   }
-
+  //无keydiff算法分三步
   const patchChildren: PatchChildrenFn = (
     n1,
     n2,
@@ -1657,7 +1657,7 @@ function baseCreateRenderer(
         )
         return
       } else if (patchFlag & PatchFlags.UNKEYED_FRAGMENT) {
-        // unkeyed
+        // unkeyed 无keydiff算法 
         patchUnkeyedChildren(
           c1 as VNode[],
           c2 as VNodeArrayChildren,
@@ -1687,6 +1687,7 @@ function baseCreateRenderer(
         // prev children was array
         if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
           // two arrays, cannot assume anything, do full diff
+          //diff算法操作一、渲染整个元素
           patchKeyedChildren(
             c1 as VNode[],
             c2 as VNodeArrayChildren,
@@ -1700,12 +1701,14 @@ function baseCreateRenderer(
           )
         } else {
           // no new children, just unmount old
+          //diff算法操作二、做一个删除
           unmountChildren(c1 as VNode[], parentComponent, parentSuspense, true)
         }
       } else {
         // prev children was text OR null
         // new children is array OR null
         if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+          //diff算法操作三、做一个新增
           hostSetElementText(container, '')
         }
         // mount new if array
@@ -1746,6 +1749,7 @@ function baseCreateRenderer(
       const nextChild = (c2[i] = optimized
         ? cloneIfMounted(c2[i] as VNode)
         : normalizeVNode(c2[i]))
+        //diff算法操作一、重新渲染
       patch(
         c1[i],
         nextChild,
@@ -1760,6 +1764,7 @@ function baseCreateRenderer(
     }
     if (oldLength > newLength) {
       // remove old
+      //diff算法操作三、做一个删除
       unmountChildren(
         c1,
         parentComponent,
@@ -1770,6 +1775,7 @@ function baseCreateRenderer(
       )
     } else {
       // mount new
+      //diff算法操作三、做一个新增
       mountChildren(
         c2,
         container,
@@ -1785,6 +1791,7 @@ function baseCreateRenderer(
   }
 
   // can be all-keyed or mixed
+  //有key diff算法分五步
   const patchKeyedChildren = (
     c1: VNode[],
     c2: VNodeArrayChildren,
@@ -1854,6 +1861,7 @@ function baseCreateRenderer(
       e2--
     }
 
+        //新节点多
     // 3. common sequence + mount
     // (a b)
     // (a b) c
@@ -1883,7 +1891,7 @@ function baseCreateRenderer(
         }
       }
     }
-
+        //新节点少
     // 4. common sequence + unmount
     // (a b) c
     // (a b)
@@ -1897,7 +1905,7 @@ function baseCreateRenderer(
         i++
       }
     }
-
+    // 无序
     // 5. unknown sequence
     // [i ... e1 + 1]: a b [c d e] f g
     // [i ... e2 + 1]: a b [e d c h] f g
